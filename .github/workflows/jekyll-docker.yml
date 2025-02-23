@@ -1,4 +1,4 @@
-name: Jekyll site CI
+name: Jekyll Site CI/CD
 
 on:
   push:
@@ -8,13 +8,73 @@ on:
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
-
+    
     steps:
-    - uses: actions/checkout@v4
-    - name: Build the site in the jekyll/builder container
+    - name: Checkout Repository
+      uses: actions/checkout@v4
+
+    - name: Set Up Ruby & Bundler Cache
+      uses: ruby/setup-ruby@v1
+      with:
+        ruby-version: '3.1'
+        bundler-cache: true # Caches dependencies to speed up builds
+
+    - name: Install Jekyll & Plugins
       run: |
-        docker run \
-        -v ${{ github.workspace }}:/srv/jekyll -v ${{ github.workspace }}/_site:/srv/jekyll/_site \
-        jekyll/builder:latest /bin/bash -c "chmod -R 777 /srv/jekyll && jekyll build --future"
+        bundle install
+        bundle exec jekyll build --future
+
+    - name: Upload Built Site as Artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: jekyll-site
+        path: _site
+
+  seo-check:
+    needs: build
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Download Built Site
+      uses: actions/download-artifact@v3
+      with:
+        name: jekyll-site
+        path: _site
+
+    - name: Run HTMLProofer for SEO & Broken Links
+      run: |
+        gem install html-proofer
+        htmlproofer ./_site --check-html --check-opengraph --check-favicon --assume-extension --disable-external
+
+  deploy:
+    needs: [build, seo-check]
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v4
+
+    - name: Download Built Site
+      uses: actions/download-artifact@v3
+      with:
+        name: jekyll-site
+        path: _site
+
+    - name: Optimize Images & HTML
+      run: |
+        sudo apt-get install optipng jpegoptim
+        find _site -name "*.png" -exec optipng {} \;
+        find _site -name "*.jpg" -exec jpegoptim --max=85 {} \;
+        find _site -name "*.html" -exec sed -i 's/  / /g' {} \; # Minify HTML
+
+    - name: Deploy to GitHub Pages
+      uses: JamesIves/github-pages-deploy-action@v4
+      with:
+        branch: gh-pages
+        folder: _site
+        clean: true
+
+    - name: Setup Custom Domain
+      run: |
+        echo "Odhiambo08892.github.io" > _site/CNAME
