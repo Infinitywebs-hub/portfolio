@@ -1,5 +1,6 @@
-# Personal Portfolio 🔥
-> https://Odhiambo08892.github.io/portfolio 
+# Personal Ultimate Portfolio 🔥
+
+🚀 Ultimate Portfolio – A sleek, responsive 🌐 and interactive 💡 showcase of my skills, projects & expertise! 🎨✨ Smooth animations, seamless UX, and a lasting impression. Dive in & let’s connect! 🔥👨‍💻💼
 
 :star: Star me on GitHub — it helps!
 
