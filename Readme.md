@@ -1,5 +1,4 @@
-# Personal Portfolio 🔥
-> https://Odhiambo08892.github.io/portfolio 
+# Personal Ultimate Portfolio 🔥
 
 :star: Star me on GitHub — it helps!
 
